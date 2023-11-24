@@ -51,7 +51,7 @@ public:
     void setVenueLocation(const string& location) {
         strcpy_s(this->venueLocation, location.c_str());
     }
-    //Getters and setters for seatType
+    //Getters and display for seatType
     seatCategory getSeatType() {
         return this->seatType;
     }
@@ -74,9 +74,13 @@ public:
     }
 
 
-
+    //getters and setters for totalSeatsSold
     int getTotalSeatsSold() {
         return this->totalSeatsSold;
+    }
+
+    void setTotalSeatsSold(int totalSold) {
+        this->totalSeatsSold = totalSold;
     }
 
     const int getMaxNoOfSeats() {
@@ -96,10 +100,10 @@ int main() {
     bool availability = true;
     string name = "Ghencea";
     string location = "Bucuresti";
-    seatCategory type = PREMIUM;
-    int totalSold = 100;
+    seatCategory type = VIP;
+    int totalSold = 10000;
     int** seatingChart = nullptr;
-    int testNo;
+
     // Creating an instance of Venue
     
     Venue myVenue(availability, name.c_str(), location.c_str(), type, totalSold, seatingChart);
@@ -150,9 +154,12 @@ int main() {
         return 1; // Exit the program with an error code
     }
 
-    cout << " seat type :" << myVenue.displaySeatType(type);
+    cout << " seat type :" << myVenue.displaySeatType(type)<<endl;
     
-
+    cout << "type the number of sold seats :" << endl;
+    cin >> totalSold;
+    myVenue.setTotalSeatsSold(totalSold);
+    cout << "The number of seats sold is :" << myVenue.getTotalSeatsSold() << endl;
 
     //cout << myVenue.getVenueName();
     // Displaying the attributes
