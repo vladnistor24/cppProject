@@ -227,6 +227,19 @@ public:
           //  throw out_of_range("invalid seat input");
         //}
     }
+    //postfix
+    Venue operator++(int) {
+        Venue copy = *this;
+        this->totalSeatsSold += 1;
+        return *this;
+    }
+    //prefix
+    Venue operator++() {
+        this->totalSeatsSold += 1;
+        return *this;
+    }
+
+
 
 };
 
