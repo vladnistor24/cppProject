@@ -243,9 +243,256 @@ public:
 
 };
 
+
+class Ticket {
+private:
+    string eventName;
+    string venueName;
+    string seatNumber;
+    float price;
+    string* ticketDetails;//dynamically managed field
+    static const int maxNoOfTicketsPerPerson = 0;// statically and constant field
+    int ticketNumbers[maxNoOfTicketsPerPerson];//statically defined array
+
+public:
+
+    //default constructor
+    Ticket() : eventName(""), venueName(""), seatNumber(""), price(0.0), ticketDetails(nullptr) {}
+
+    //constructor
+    Ticket(string& eventName, string& venueName, string& seatNumber, float price) {
+        this->eventName = eventName;
+        this->venueName = venueName;
+        this->seatNumber = seatNumber;
+        this->price = price;
+    }
+
+    Ticket(const string& details) {
+        for (int i = 0; i < maxNoOfTicketsPerPerson; i++) {
+            ticketNumbers[i]++;
+        }
+
+    }
+
+    const int* getTicketNumbers() {
+        return ticketNumbers;
+    }
+
+    void setTicketNumbers(int ticketsNumber) {
+        for (int i = 0; i < maxNoOfTicketsPerPerson; i++) {
+            this->ticketNumbers[i] = ticketsNumber;
+        }
+    }
+
+    Ticket(string& details) {
+        ticketDetails = new string(details);
+    }
+
+    //destructor
+
+    ~Ticket() {
+        delete[] ticketDetails;
+    }
+
+    string getTicketDetails() const {
+        return *ticketDetails;
+    }
+
+    void setTicketDetails(const string& details) {
+        if (!ticketDetails) {
+            ticketDetails = new string(details);
+        }
+        else {
+            *ticketDetails = details;
+        }
+    }
+    //getters and setters
+
+    void setEventName(const string& name) {
+        if (name.length() < 3 || name.length() > 50) {
+            throw invalid_argument("Event name length should be between 3 and 50 characters.");
+        }
+        eventName = name;
+    }
+
+    string getEventName() const {
+        return eventName;
+    }
+
+    void setVenueName(const string& venue) {
+        if (venue.length() < 3 || venue.length() > 50) {
+            throw invalid_argument("Venue name length should be between 3 and 50 characters.");
+        }
+        venueName = venue;
+    }
+
+    string getVenueName() const {
+        return venueName;
+    }
+
+    void setSeatNumber(const string& seat) {
+        if (seat.empty()) {
+            throw invalid_argument("Seat number cannot be empty.");
+        }
+        seatNumber = seat;
+    }
+
+    string getSeatNumber() const {
+        return seatNumber;
+    }
+
+    void setPrice(float ticketPrice) {
+        if (ticketPrice <= 0) {
+            throw invalid_argument("Ticket price should be greater than zero.");
+        }
+        price = ticketPrice;
+    }
+
+    float getPrice() const {
+        return price;
+    }
+
+    //copy constructor
+    Ticket(const Ticket& other) {
+        this->eventName = other.eventName;
+        this->venueName = other.venueName;
+        this->seatNumber = other.seatNumber;
+        this->price = other.price;
+    }
+    //overloaded form of operator =
+    Ticket& operator=(const Ticket& other) {
+        if (this != &other) { // Check for self-assignment
+            eventName = other.eventName;
+            venueName = other.venueName;
+            seatNumber = other.seatNumber;
+            price = other.price;
+
+            // Deep copy for dynamically managed field
+            if (other.ticketDetails != nullptr) {
+                if (ticketDetails == nullptr) {
+                    ticketDetails = new string(*other.ticketDetails);
+                }
+                else {
+                    *ticketDetails = *other.ticketDetails;
+                }
+            }
+            else {
+                delete ticketDetails;
+                ticketDetails = nullptr;
+            }
+        }
+        return *this;
+    }
+
+    //overloading << operator for output
+    friend ostream& operator<<(ostream& os, const Ticket& ticket) {
+        os << "Event Name: " << ticket.getEventName() << endl;
+        os << "Venue Name: " << ticket.getVenueName() << endl;
+        os << "Seat Number: " << ticket.getSeatNumber() << endl;
+        os << "Price: $" << ticket.getPrice() << endl;
+        os << "Ticket Details: " << ticket.getTicketDetails() << endl;
+        return os;
+    }
+
+    //overloading >> operator for input
+    friend istream& operator>>(istream& is, Ticket& ticket) {
+        string eventName, venueName, seatNumber, details;
+        float price;
+
+        cout << "Enter Event Name: ";
+        is >> eventName;
+        ticket.setEventName(eventName);
+
+        cout << "Enter Venue Name: ";
+        is >> venueName;
+        ticket.setVenueName(venueName);
+
+        cout << "Enter Seat Number: ";
+        is >> seatNumber;
+        ticket.setSeatNumber(seatNumber);
+
+        cout << "Enter Ticket Price: ";
+        is >> price;
+        ticket.setPrice(price);
+
+        cout << "Enter Ticket Details: ";
+        is >> details;
+        ticket.setTicketDetails(details);
+
+        return is;
+    }
+
+    //overloading indexing operator []
+    string& operator[](int index) {
+        if (index >= 0 && index < maxNoOfTicketsPerPerson) {
+            return ticketDetails[index];
+        }
+        else {
+            throw out_of_range("Index out of range");
+        }
+    }
+
+
+
+    //overloading addition operator +
+    Ticket operator+(const Ticket& other) {
+        Ticket result(*this); // Make a copy
+        result.price += other.price;
+        return result;
+    }
+
+    //overloading prefix increment operator ++
+    Ticket& operator++() {
+        ++price;
+        return *this;
+    }
+
+    //overloading postfix increment operator ++
+    Ticket operator++(int) {
+        Ticket temp(*this); // Make a copy
+        ++(*this);
+        return temp;
+    }
+
+    //overloading cast operator to float
+    explicit operator float() const {
+        return price;
+    }
+
+    //overloading negation operator !
+    bool operator!() const {
+        return price == 0.0f;
+    }
+
+    //overloading less than operator <
+    bool operator<(const Ticket& other) const {
+        return price < other.price;
+    }
+
+    //overloading equality operator ==
+    bool operator==(const Ticket& other) const {
+        return (eventName == other.eventName &&
+            venueName == other.venueName &&
+            seatNumber == other.seatNumber &&
+            price == other.price);
+    }
+    //method for displaying the details of the ticket
+    void displayTicket() {
+        cout << "Event Name: " << eventName << endl;
+        cout << "Venue Name: " << venueName << endl;
+        cout << "Seat Number: " << seatNumber << endl;
+        cout << "Price: " << price << endl;
+    }
+};
+
+
+
 int Venue::totalSeatsSold = 0;
 
 int main() {
+    //CLASS VENUE
+
+    //declared variables for class Venue
     bool availability = true;
     string name = "Ghencea";
     string location = "Bucuresti";
@@ -262,7 +509,7 @@ int main() {
     
     Venue myVenue(availability, name.c_str(), location.c_str(), type, totalSold, seatingChart,rows,cols);
     
-    cout << "type seat availability :";
+    cout << "type seat availability(1 if the seat is available and 0 if the seat is occupied :";
     cin >> availability;
     myVenue.setSeatAvailability(availability);
     if (myVenue.getSeatAvailability() == 1) {
@@ -326,17 +573,66 @@ int main() {
     }
 
     myVenue.setSeatAvailability(rows, cols, 1);
-    cout << myVenue.getSeatingChart();
+    cout << myVenue.getSeatingChart()<<endl;
+    
+    //CLASS TICKET
 
-    //cout << myVenue.getVenueName();
-    // Displaying the attributes
-    //std::cout << "Seat Availability: " << myVenue.getSeatAvailability() << std::endl;
-    //std::cout << "Venue Name: " << myVenue.getVenueName() << std::endl;
-    //std::cout << "Venue Location: " << myVenue.getVenueLocation() << std::endl;
-    //std::cout << "Seat Type: " << myVenue.getSeatType() << std::endl;
-    //std::cout << "Seat Type: " << myVenue.displaySeatType(type) << std::endl;
-    //std::cout << "Total Seats Sold: " << myVenue.getTotalSeatsSold() << std::endl;
-    //std::cout << "Max No. of Seats: " << myVenue.getMaxNoOfSeats() << std::endl;
+    string eventName, venueName, seatNumber;
+    float price = 0;
+    string details;
+
+    Ticket myTicketDetails(details);
+
+    cout << "enter ticket details :" << endl;
+    cin >> details;
+    myTicketDetails.setTicketDetails(details);
+    cout << myTicketDetails.getTicketDetails() << endl;
+
+    //creating a ticket object
+    Ticket myTicket(eventName, venueName, seatNumber, price);
+
+    // Reading ticket attributes from the user
+    cout << "Enter Event Name: " << endl;
+    cin >> eventName;
+    myTicket.setEventName(eventName);
+    cout << "Event Name: " << myTicket.getEventName() << endl;
+
+    cout << "Enter Venue Name: " << endl;
+    cin >> venueName;
+    myTicket.setVenueName(venueName);
+    cout << "Venue Name: " << myTicket.getVenueName() << endl;
+
+    cout << "Enter Seat Number: " << endl;
+    cin >> seatNumber;
+    myTicket.setSeatNumber(seatNumber);
+    cout << "Seat Number: " << myTicket.getSeatNumber() << endl;
+
+    cout << "Enter Ticket Price: " << endl;
+    cin >> price;
+    myTicket.setPrice(price);
+    cout << "Price: $" << myTicket.getPrice() << endl;
+
+    Ticket t1, t2;
+
+    // Usage examples
+    t1[0] = "VIP Seat";
+    t1[1] = "Premium Seat";
+
+    Ticket result = t1 + t2;
+    ++t1;
+    t2++;
+
+    float priceValue = float(t1);
+    bool isNotZero = !t2;
+    bool isLessThan = t1 < t2;
+    bool isEqual = (t1 == t2);
+
+    t1.displayTicket();
+
+
+
+
+    return 0;
 
     return 0;
 }
