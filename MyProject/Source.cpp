@@ -485,6 +485,289 @@ public:
     }
 };
 
+class User {
+private:
+    string userID;
+    string familyName;
+    string firstName;
+    string userPhoneNumber;
+    string* additionalInfo;// dynamically managed field
+    static const int maxFirstNames = 5;// static and const field
+    string maxFirstNamesArray[maxFirstNames];//statically defined array
+
+
+public:
+    //constructor
+    User(string& userID, string& familyName, string& firstName, string userPhoneNumber, const string additionalInfo) {
+        this->userID = userID;
+        this->familyName = familyName;
+        this->firstName = firstName;
+        this->userPhoneNumber = userPhoneNumber;
+        this->additionalInfo = new string(additionalInfo);
+    }
+
+    //destructor
+    ~User() {
+        delete[] additionalInfo;
+    }
+
+    //constructor for maxFirstNames and the array
+
+    User(const string maxFirstNamesArray[], int maxFirstNames) {
+        //initializing maxFirstNamesArray with the given values
+        for (int i = 0; i < maxFirstNames; ++i) {
+            this->maxFirstNamesArray[i] = maxFirstNamesArray[i];
+        }
+    }
+
+    //getters 
+
+    const string& getUserID() const {
+        return userID;
+    }
+
+    const string& getFamilyName() const {
+        return familyName;
+    }
+
+    const string& getFirstName() const {
+        return firstName;
+    }
+
+    string getUserPhoneNumber() const {
+        return userPhoneNumber;
+    }
+
+    const string getAdditionalInfo() const {
+        if (additionalInfo != nullptr) {
+            return *additionalInfo;
+        }
+        return "";
+    }
+
+    const string& getMaxFirstName(int index) const {
+        if (index >= 0 && index < maxFirstNames) {
+            return maxFirstNamesArray[index];
+        }
+        else {
+            // Handle out of range error
+            throw out_of_range("Index out of range for maxFirstNamesArray");
+        }
+    }
+
+    int getMaxFirstNames() const {
+        return maxFirstNames;
+    }
+
+    //setters
+
+    void setUserID(const string& newUserID) {
+        if (sizeof(newUserID) < 6) {
+            throw invalid_argument("id must be at least 6 characters long");
+        }
+        userID = newUserID;
+    }
+
+    void setFamilyName(const string& newFamilyName) {
+        if (newFamilyName.empty()) {
+            throw invalid_argument("Family name cannot be empty.");
+        }
+        familyName = newFamilyName;
+    }
+
+    void setFirstName(const string& newFirstName) {
+        if (newFirstName.empty()) {
+            throw invalid_argument("First name cannot be empty.");
+        }
+        firstName = newFirstName;
+    }
+
+    void setUserPhoneNumber(const string& newUserPhoneNumber) {
+        if (newUserPhoneNumber.length() != 10) {
+            throw invalid_argument("Phone number must be 10 digits long.");
+        }
+        userPhoneNumber = newUserPhoneNumber;
+    }
+
+    void setAdditionalInfo(const string& info) {
+        if (additionalInfo == nullptr) {
+            additionalInfo = new string(info);
+        }
+        else {
+            *additionalInfo = info;
+        }
+    }
+
+    void setMaxFirstName(int index, const string& value) {
+        if (index >= 0 && index < maxFirstNames) {
+            maxFirstNamesArray[index] = value;
+        }
+        else {
+            // Handle out of range error
+            throw out_of_range("Index out of range for maxFirstNamesArray");
+        }
+    }
+    //method to display the attributes
+    template<typename T>
+    void displayAttribute(const T& attribute) const {
+        cout << "Attribute: " << attribute << endl;
+    }
+    //method to display all attributes
+    void displayAttributes() const {
+        displayAttribute(userID);
+        displayAttribute(familyName);
+        displayAttribute(firstName);
+        displayAttribute(userPhoneNumber);
+        displayAttribute(getAdditionalInfo());
+
+        for (int i = 0; i < maxFirstNames; ++i) {
+            displayAttribute(maxFirstNamesArray[i]);
+        }
+    }
+
+    //copy constructor
+    User(const User& other) {
+        userID = other.userID;
+        familyName = other.familyName;
+        firstName = other.firstName;
+        userPhoneNumber = other.userPhoneNumber;
+        if (other.additionalInfo != nullptr) {
+            additionalInfo = new string(*other.additionalInfo);
+        }
+        else {
+            additionalInfo = nullptr;
+        }
+        for (int i = 0; i < maxFirstNames; ++i) {
+            maxFirstNamesArray[i] = other.maxFirstNamesArray[i];
+        }
+    }
+
+    //overloaded form of the operator =
+    User& operator=(const User& other) {
+        if (this != &other) {
+            userID = other.userID;
+            familyName = other.familyName;
+            firstName = other.firstName;
+            userPhoneNumber = other.userPhoneNumber;
+
+            // Deallocate existing additionalInfo if it exists
+            delete additionalInfo;
+            if (other.additionalInfo != nullptr) {
+                additionalInfo = new string(*other.additionalInfo);
+            }
+            else {
+                additionalInfo = nullptr;
+            }
+
+            // Copy maxFirstNamesArray
+            for (int i = 0; i < maxFirstNames; ++i) {
+                maxFirstNamesArray[i] = other.maxFirstNamesArray[i];
+            }
+        }
+        return *this;
+    }
+
+    //overloaded << operator for output
+    friend ostream& operator<<(ostream& os, const User& user) {
+        os << "User ID: " << user.userID << endl
+            << "Family Name: " << user.familyName << endl
+            << "First Name: " << user.firstName << endl
+            << "Phone Number: " << user.userPhoneNumber << endl
+            << "Additional Info: " << (user.additionalInfo != nullptr ? *user.additionalInfo : "") << endl
+            << "First Names: ";
+        for (int i = 0; i < user.maxFirstNames; ++i) {
+            os << user.maxFirstNamesArray[i] << " ";
+        }
+        return os;
+    }
+    //overloaded >> operator for input
+    friend istream& operator>>(istream& is, User& user) {
+        cout << "Enter User ID: ";
+        is >> user.userID;
+
+        cout << "Enter Family Name: ";
+        is >> user.familyName;
+
+        cout << "Enter First Name: ";
+        is >> user.firstName;
+
+        cout << "Enter Phone Number: ";
+        is >> user.userPhoneNumber;
+
+        cout << "Enter Additional Info: ";
+        string additional;
+        is >> additional;
+        user.additionalInfo = new string(additional);
+
+        cout << "Enter First Names (up to " << user.maxFirstNames << " names): ";
+        for (int i = 0; i < user.maxFirstNames; ++i) {
+            is >> user.maxFirstNamesArray[i];
+        }
+        return is;
+    }
+    //overloading indexing operator []
+    string& operator[](int index) {
+        if (index == 0) {
+            return userID;
+        }
+        else if (index == 1) {
+            return familyName;
+        }
+        else if (index == 2) {
+            return firstName;
+        }
+        //handle other indices or throw an exception for out-of-bounds access
+        throw out_of_range("Index out of bounds");
+    }
+
+    //overloading addition operator +
+    User operator+(const User& other) const {
+        User result(*this);
+        //define addition logic here (if needed)
+        return result;
+    }
+
+    //overloading prefix increment operator ++
+    User& operator++() {
+        //define prefix increment logic here
+        return *this;
+    }
+
+    //overloading postfix increment operator ++
+    User operator++(int) {
+        User temp(*this);
+        //define postfix increment logic here
+        return temp;
+    }
+
+    //overloading casting operator
+    explicit operator string() const {
+        //define casting logic to string
+        return userID + " " + familyName + " " + firstName;
+    }
+
+    //overloading negation operator !
+    bool operator!() const {
+        //define negation logic here
+        return userID.empty() && familyName.empty() && firstName.empty();
+    }
+
+    //overloading relational operator <
+    bool operator<(const User& other) const {
+        //define less-than comparison logic here
+        return userID < other.userID;
+    }
+
+    //overloading equality operator ==
+    bool operator==(const User& other) const {
+        //define equality comparison logic here
+        return (userID == other.userID) && (familyName == other.familyName) && (firstName == other.firstName);
+    }
+
+
+};
+
+
 
 
 int Venue::totalSeatsSold = 0;
@@ -509,6 +792,8 @@ int main() {
     
     Venue myVenue(availability, name.c_str(), location.c_str(), type, totalSold, seatingChart,rows,cols);
     
+    cout << "CLASS VENUE" << endl;
+
     cout << "type seat availability(1 if the seat is available and 0 if the seat is occupied :";
     cin >> availability;
     myVenue.setSeatAvailability(availability);
@@ -583,6 +868,8 @@ int main() {
 
     Ticket myTicketDetails(details);
 
+    cout << "CLASS TICKET" << endl;
+
     cout << "enter ticket details :" << endl;
     cin >> details;
     myTicketDetails.setTicketDetails(details);
@@ -629,10 +916,54 @@ int main() {
 
     t1.displayTicket();
 
+    //CLASS USER
+    string userID, familyName, firstName;
+    string phoneNumber;
+    string additioanlInfo;
+    string maxFirstNamesArray[5];// an array that can hold up to 5 names of the same person
+
+    User user1(userID, familyName, firstName, phoneNumber, additioanlInfo);
+
+    cout << "CLASS USER" << endl;
+
+    cout << "enter user id:" << endl;
+    cin >> userID;
+    user1.setUserID(userID);
+    cout << "user id is:" << user1.getUserID() << endl;
+
+    cout << "enter family name:" << endl;
+    cin >> familyName;
+    user1.setFamilyName(familyName);
+    cout << "family name is: " << user1.getFamilyName() << endl;
+
+    cout << "enter first name:" << endl;
+    cin >> firstName;
+    user1.setFirstName(firstName);
+    cout << "first name is:" << user1.getFirstName() << endl;
+
+    cout << "enter phone number:" << endl;
+    cin >> phoneNumber;
+    user1.setUserPhoneNumber(phoneNumber);
+    cout << "phone number of the user is:" << user1.getUserPhoneNumber() << endl;
+
+    cout << "enter additional info" << endl;
+    cin >> additioanlInfo;
+    user1.setAdditionalInfo(additioanlInfo);
+    cout << "additional info is :" << user1.getAdditionalInfo() << endl;
+
+    cout << "Enter up to 5 first names:" << endl;
+    for (int i = 0; i < 5; ++i) {
+        cout << "First Name " << i + 1 << ": ";
+        cin >> maxFirstNamesArray[i];
+    }
+
+    cout << "Names entered:" << endl;
+    for (int i = 0; i < 5; ++i) {
+        cout << "First Name " << i + 1 << ": " << maxFirstNamesArray[i] << endl;
+    }
 
 
 
-    return 0;
 
     return 0;
 }
